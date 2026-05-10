@@ -1,0 +1,31 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+*.log
+.idea/
+*.iml
+
+# Node
+node_modules/
+dist/
+.DS_Store
+*.local
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Env
+.env
+.env.local
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd

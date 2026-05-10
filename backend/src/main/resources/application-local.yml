@@ -1,0 +1,12 @@
+# 本地开发配置 - 连接Docker中的MySQL和Redis
+# 启动方式: 设置环境变量 SPRING_PROFILES_ACTIVE=local 或在运行参数中添加 --spring.profiles.active=local
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/alert_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: alert123456
+  redis:
+    host: localhost
+    port: 6379
+    password: alert123456

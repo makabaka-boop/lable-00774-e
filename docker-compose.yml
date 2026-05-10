@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: alert-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: alert123456
+      MYSQL_DATABASE: alert_system
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --character-set-client-handshake=FALSE --init-connect='SET NAMES utf8mb4'
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - alert-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: alert-redis
+    command: redis-server --requirepass alert123456
+    volumes:
+      - redis_data:/data
+    networks:
+      - alert-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: alert-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/alert_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=alert123456
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PASSWORD=alert123456
+    networks:
+      - alert-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: alert-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - alert-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  alert-network:
+    driver: bridge
